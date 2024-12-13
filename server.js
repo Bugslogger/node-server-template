@@ -1,6 +1,6 @@
+require("dotenv").config(); // always keep this line at top else it will throw error
 require("./utils/load.events/load.process.events")();
 const app = require("./app");
-require("dotenv").config();
 const db = require("./models/db.connect");
 
 db.connection
@@ -17,6 +17,7 @@ db.connection
       "Failed to sync db: " + err.message
     );
   });
+
 
 app.listen(process.env.PORT || 4000, () => {
   console.log(`Node Environment: ${process.env.NODE_ENV}.`);

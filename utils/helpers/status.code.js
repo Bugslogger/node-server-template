@@ -58,11 +58,11 @@ exports.tooManyRequests = (send, message) => {
 };
 
 // status code from 500
-exports.internalError = (send) => {
+exports.internalError = (send, error) => {
   send.status(500).json({
     // status: "failed",
     statuscode: 0,
-    message: "Oops! looks like something went wrong with our server.",
+    message: error || "Oops! looks like something went wrong with our server.",
   });
 };
 

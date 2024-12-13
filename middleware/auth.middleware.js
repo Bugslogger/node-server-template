@@ -1,26 +1,30 @@
-const db = require("../models/user.model");
+const db = require("../models/db.connect");
 const { verifyToken } = require("../utils/helpers/app.helper");
-const { Unauthorized } = require("../utils/helpers/status.code");
+const { Unauthorized, Success } = require("../utils/helpers/status.code");
 const User = db.user;
 
 exports.isTokenValid = async (req, res, next) => {
   try {
     const token = req.headers.authorization;
 
-    if (!token && !token.startsWith("Bearer")) {
+    if (!token || !token.startsWith("Bearer")) {
       return Unauthorized(res, "Missing auth token");
     }
 
-    const status = await verifyToken(token);
-    if (status && status["userId"]) {
+    const tkn = token.split(" ")[1];
+    const status = await verifyToken(tkn);
+    console.log("status: ", !!status && !!status["userId"]);
+    if (!!status && !!status["userId"]) {
       const user = await User.findByPk(status["userId"]);
       if (user) {
+        console.log("user: ", user?.dataValues);
+        req.user = user?.dataValues;
+        next();
       }
-      // validate the user id
     } else {
-      return Unauthorized(res, "Invalid Auth token!");
+      return Unauthorized(res, status || "Invalid Auth token!");
     }
   } catch (error) {
-    return error;
+    return error.message;
   }
 };

@@ -15,3 +15,4 @@ module.exports = {
   },
   timezone: process.env.DB_TIMEZONE,
 };
+

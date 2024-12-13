@@ -22,11 +22,15 @@ const {
   RATE_LIMIT_TIME,
 } = require("./config/server.config");
 
+// routers
+
 const app = express();
 
 // create MAP object
 const map = new Map();
 express.serverStorage = map;
+
+const authRouter = require("./routes/auth.routes");
 
 // Allow Cross-Origin requests
 app.use(cors({ origin: "*", credentials: true }));
@@ -50,7 +54,7 @@ app.use(
 
 // parse application/json
 app.use(bodyParser.json({ limit: BODY_SIZE }));
-
+app.use(express.json());
 app.use(
   cookieSession({
     name: SERVER_NAME,
@@ -87,6 +91,10 @@ console.log(clc.blue("> xss: ", "true"));
 app.use(hpp());
 console.log(clc.blue("> parameter pollution: ", "true"));
 
+// routers
+app.use("/api", authRouter);
+
 app.use(logger("dev")); // log
+// console.log("storeage: ", express);
 
 module.exports = app;

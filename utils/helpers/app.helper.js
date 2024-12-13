@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
 const transporter = require("./nodemailer");
+const { promisify } = require("util");
+const { badRequest, Success } = require("./status.code");
 
 /**
  *
@@ -64,8 +66,8 @@ exports.checkUserPasswordForgetLink = ({ storage, uniqueId, action }) => {
         throw new Error("User uniqueId is not empty or undefined.");
       }
       if (action === "delete") {
-        if (storage.has(uniqueId)) {
-          storage.delete(uniqueId);
+        if (storage.has(`f${uniqueId}p`)) {
+          storage.delete(`f${uniqueId}p`);
 
           return { deleted: true, storage, uniqueId };
         } else {
@@ -73,8 +75,8 @@ exports.checkUserPasswordForgetLink = ({ storage, uniqueId, action }) => {
         }
       }
 
-      if (storage.has(uniqueId)) {
-        storage.delete(uniqueId);
+      if (storage.has(`f${uniqueId}p`)) {
+        storage.delete(`f${uniqueId}p`);
       }
 
       storage.set(`f${uniqueId}p`, `requested password reset`);
@@ -95,12 +97,12 @@ exports.sendMail = async (req, res, next, html, subject, message) => {
     badRequest(res, "request body is missing one or more parameter");
   }
 
-  if (!User.email.validate(email)) {
-    Success(res, {
-      statuscode: 0,
-      message: "Invalid email address.",
-    });
-  }
+  // if (!User.email.validate(email)) {
+  //   Success(res, {
+  //     statuscode: 0,
+  //     message: "Invalid email address.",
+  //   });
+  // }
 
   const mailData = {
     from: "No-Reply@zeal.biz",
@@ -128,15 +130,18 @@ exports.sendMail = async (req, res, next, html, subject, message) => {
 
 exports.verifyToken = async (token) => {
   try {
-    return await jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-      if (decoded && decoded?.id) {
-        return {
-          userId: decoded?.id,
-        };
-      }
-      return err;
-    });
+    const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    // return await jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    //   console.log(decoded, err.message);
+
+    if (decode && decode?.id) {
+      return {
+        userId: decode?.id,
+      };
+    }
+    //   return err.message;
+    // });
   } catch (error) {
-    return error;
+    return error.message;
   }
 };

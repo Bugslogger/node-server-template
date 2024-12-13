@@ -3,14 +3,27 @@ module.exports = (connection, Sequelize) => {
     "users",
     {
       id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+      uid: { type: Sequelize.STRING, unique: true }, // unique identifier
       fullname: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       email: {
         type: Sequelize.STRING,
+        allowNull: false,
+        unique: true,
+        validate: {
+          isEmail: {
+            msg: "Must be a valid email address.",
+          },
+          notEmpty: {
+            msg: "Email cannot be empty.",
+          },
+        },
       },
       password: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       contact: {
         type: Sequelize.STRING,
@@ -25,6 +38,11 @@ module.exports = (connection, Sequelize) => {
         type: Sequelize.ENUM,
         values: ["Active", "Disabled", "Suspended"],
         defaultValue: "Active",
+      },
+      isVerified: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
       },
       createdon: {
         type: Sequelize.DATE,
